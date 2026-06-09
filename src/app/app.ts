@@ -1,4 +1,5 @@
-import { Component, signal, computed, effect, OnInit } from '@angular/core';
+import { Component, signal, computed, effect, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 // Modèle d'une activité
@@ -72,16 +73,22 @@ export class App implements OnInit {
   );
 
   // ── Persistance automatique via effect ───────────────────────────────────
+  private platformId = inject(PLATFORM_ID);
+
   constructor() {
     effect(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.activites()));
+      if (isPlatformBrowser(this.platformId)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.activites()));
+      }
     });
   }
 
   ngOnInit(): void {
-    const donneesSauvegardees = localStorage.getItem(STORAGE_KEY);
-    if (donneesSauvegardees) {
-      this.activites.set(JSON.parse(donneesSauvegardees));
+    if (isPlatformBrowser(this.platformId)) {
+      const donneesSauvegardees = localStorage.getItem(STORAGE_KEY);
+      if (donneesSauvegardees) {
+        this.activites.set(JSON.parse(donneesSauvegardees));
+      }
     }
   }
 
